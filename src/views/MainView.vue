@@ -17,21 +17,32 @@
         {{ content }}
       </span>
     </div>
-    <button
-      @click="capturePhoto"
-      class="absolute top-4 right-4 z-10 px-4 py-2 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition"
-    >
-      拍照並下載
-    </button>
+    <div class="absolute top-4 right-4 z-10 flex gap-2">
+      <button
+        @click="capturePhoto"
+        class="px-4 py-2 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition"
+      >
+        拍照並下載
+      </button>
+      <button
+        @click="goToGallery"
+        class="px-4 py-2 bg-green-500 text-white rounded-lg shadow hover:bg-green-600 transition"
+      >
+        查看相簿
+      </button>
+    </div>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 
 const video = ref<HTMLVideoElement | null>(null)
 const canvas = ref<HTMLCanvasElement | null>(null)
 const content = ref<string>('')
+const photos = ref<string[]>([])
+const router = useRouter()
 
 onMounted(() => {
   if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
@@ -70,6 +81,8 @@ const capturePhoto = (): void => {
   context.fillText(content.value, canvas.value.width / 2, canvas.value.height / 2)
 
   const imageUrl: string = canvas.value.toDataURL('image/png')
+  photos.value.push(imageUrl)
+  localStorage.setItem('capturedPhotos', JSON.stringify(photos.value))
   downloadImage(imageUrl)
 }
 
@@ -80,5 +93,9 @@ const downloadImage = (dataUrl: string): void => {
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
+}
+
+const goToGallery = () => {
+  router.push('/pictureBoard')
 }
 </script>
