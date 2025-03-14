@@ -1,15 +1,21 @@
 <template>
-  <div class="flex flex-col items-center justify-center min-h-screen w-screen bg-gray-100">
-    <div class="relative w-full max-w-xl">
-      <video ref="video" class="w-full rounded-lg shadow-lg" autoplay></video>
-      <canvas ref="canvas" class="hidden"></canvas>
-      <div class="absolute inset-0 flex items-center justify-center">
-        <span class="text-white text-4xl font-bold bg-opacity-50 px-4 py-2"> Hello </span>
-      </div>
+  <div class="relative w-screen h-screen flex flex-col items-center justify-center">
+    <input
+      type="text"
+      v-model="content"
+      class="absolute top-4 z-10 w-1/3 px-4 py-2 rounded-lg border border-gray-300 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+      placeholder="輸入文字..."
+    />
+    <video ref="video" class="absolute inset-0 w-full h-full object-cover" autoplay></video>
+    <canvas ref="canvas" class="hidden"></canvas>
+    <div class="absolute inset-0 flex items-center justify-center">
+      <span class="text-white text-6xl font-bold bg-opacity-50 px-4 py-2">
+        {{ content }}
+      </span>
     </div>
     <button
       @click="capturePhoto"
-      class="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition"
+      class="absolute top-4 right-4 z-10 px-4 py-2 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition"
     >
       拍照並下載
     </button>
@@ -21,6 +27,7 @@ import { ref, onMounted } from 'vue'
 
 const video = ref<HTMLVideoElement | null>(null)
 const canvas = ref<HTMLCanvasElement | null>(null)
+const content = ref<string>('')
 
 onMounted(() => {
   if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
