@@ -17,4 +17,5 @@ export default defineConfig({
   build: {
     outDir: 'dist',
   },
+  base: './', // 使用相對路徑，而不是絕對路徑
 })
