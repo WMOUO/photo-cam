@@ -1,3 +1,3 @@
 <template>
-  <router-iew />
+  <router-view />
 </template>
