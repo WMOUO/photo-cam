@@ -1,5 +1,7 @@
 <template>
   <div class="font-display">
-    <RouterView />
+    <n-dialog-provider>
+      <RouterView />
+    </n-dialog-provider>
   </div>
 </template>

@@ -1,11 +1,5 @@
 <template>
   <div class="relative w-screen h-screen flex flex-col items-center justify-center">
-    <input
-      type="text"
-      v-model="content"
-      class="absolute top-4 z-10 w-1/3 px-4 py-2 rounded-lg border border-gray-300 shadow-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-      placeholder="輸入文字..."
-    />
     <video
       ref="video"
       class="absolute inset-0 w-full h-full object-cover transform scale-x-[-1]"
@@ -13,34 +7,70 @@
     ></video>
     <canvas ref="canvas" class="hidden"></canvas>
     <div class="absolute inset-0 flex items-center justify-center">
-      <span class="text-white text-6xl font-bold bg-opacity-50 px-4 py-2">
-        {{ content }}
-      </span>
+      <!-- To{ input } -->
+      <div class="inline-flex items-center text-white text-6xl font-bold">
+        <span>To[</span>
+        <input
+          type="text"
+          v-model="content"
+          class="bg-transparent border-none focus:outline-none text-white font-bold text-6xl text-center p-0 m-0 w-auto min-w-[2ch] tracking-normal"
+          @input="adjustWidth"
+          ref="inputEl"
+        />
+
+        <span>]</span>
+      </div>
     </div>
     <div class="absolute top-4 right-4 z-10 flex gap-2">
-      <button
-        @click="capturePhoto"
-        class="px-4 py-2 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition"
-      >
-        拍照並下載
-      </button>
-      <button
-        @click="goToGallery"
-        class="px-4 py-2 bg-green-500 text-white rounded-lg shadow hover:bg-green-600 transition"
-      >
-        查看相簿
-      </button>
+      <n-button @click="goToGallery" quaternary class="px-4 py-2 rounded-lg">
+        <template #icon>
+          <n-icon size="60" color="#FFFFFF">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              xmlns:xlink="http://www.w3.org/1999/xlink"
+              viewBox="0 0 16 16"
+            >
+              <g fill="none">
+                <path
+                  d="M2 3.75A.75.75 0 0 1 2.75 3h10.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 3.75zm0 4A.75.75 0 0 1 2.75 7h10.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 7.75zm0 4a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1-.75-.75z"
+                  fill="currentColor"
+                ></path>
+              </g>
+            </svg>
+          </n-icon>
+        </template>
+      </n-button>
+    </div>
+    <div class="absolute bottom-4 mid z-10 flex gap-2">
+      <n-button quaternary round @click="capturePhoto" class="px-4 py-2 rounded-lg shadow">
+        <template #icon>
+          <n-icon size="60" color="#FFFFFF">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              xmlns:xlink="http://www.w3.org/1999/xlink"
+              viewBox="0 0 32 32"
+            >
+              <circle cx="16" cy="16" r="10" fill="currentColor"></circle>
+              <path
+                d="M16 30a14 14 0 1 1 14-14a14.016 14.016 0 0 1-14 14zm0-26a12 12 0 1 0 12 12A12.014 12.014 0 0 0 16 4z"
+                fill="currentColor"
+              ></path>
+            </svg>
+          </n-icon>
+        </template>
+      </n-button>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 
 const video = ref<HTMLVideoElement | null>(null)
 const canvas = ref<HTMLCanvasElement | null>(null)
-const content = ref<string>('')
+const content = ref<string>('') // 預設為空，但會被 To{} 包住
+const inputEl = ref<HTMLInputElement | null>(null)
 const photos = ref<string[]>([])
 const router = useRouter()
 
@@ -57,7 +87,25 @@ onMounted(() => {
         console.error('無法獲取攝影機視訊: ', error)
       })
   }
+  adjustWidth()
 })
+
+// 動態調整 input 的寬度
+const adjustWidth = () => {
+  nextTick(() => {
+    if (inputEl.value) {
+      // 計算中文字與英文字的長度
+      const textLength = content.value.length
+      const chineseCount = (content.value.match(/[\u4e00-\u9fa5]/g) || []).length
+      const englishCount = textLength - chineseCount
+
+      // 英文 = 1 單位，中文字 = 2 單位
+      const newWidth = englishCount * 1.2 + chineseCount * 2
+
+      inputEl.value.style.width = `${Math.max(2, newWidth)}ch`
+    }
+  })
+}
 
 const capturePhoto = (): void => {
   if (!video.value || !canvas.value) return
@@ -78,7 +126,7 @@ const capturePhoto = (): void => {
   context.fillStyle = 'white'
   context.textAlign = 'center'
   context.textBaseline = 'middle'
-  context.fillText(content.value, canvas.value.width / 2, canvas.value.height / 2)
+  context.fillText(`To{${content.value}}`, canvas.value.width / 2, canvas.value.height / 2)
 
   const imageUrl: string = canvas.value.toDataURL('image/png')
   photos.value.push(imageUrl)
