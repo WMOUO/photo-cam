@@ -10,6 +10,7 @@ import vueDevTools from 'vite-plugin-vue-devtools'
 export default defineConfig(() => ({
   plugins: [vue(), vueJsx(), vueDevTools(), tailwindcss()],
   resolve: {
+    extensions: ['.js', '.ts', '.vue'],
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
     },
