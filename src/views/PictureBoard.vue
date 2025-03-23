@@ -17,9 +17,11 @@
     </div>
 
     <!-- 新增：選擇本地圖片 -->
-    <input type="file" accept="image/*" multiple @change="handleFileUpload" class="mb-4" />
+    <div v-if="selected">
+      <input type="file" accept="image/*" multiple @change="handleFileUpload" class="mb-4 mt-6" />
+    </div>
 
-    <div class="grid grid-cols-3 gap-4 p-4 w-full max-w-4xl">
+    <div class="grid grid-cols-3 gap-2 p-4 w-full">
       <div v-for="(photo, index) in photos" :key="index" class="relative">
         <img :src="photo" class="w-full h-auto rounded-lg shadow-md" />
       </div>
@@ -33,6 +35,7 @@ import { useRouter } from 'vue-router'
 
 const photos = ref<string[]>([])
 const router = useRouter()
+const selected = ref(true)
 
 const goBack = () => {
   router.push('/')
@@ -52,11 +55,7 @@ const handleFileUpload = (event: Event) => {
     }
     reader.readAsDataURL(file)
   }
+  selected.value = false
+  console.log(selected.value)
 }
 </script>
-
-<style scoped>
-input[type='file'] {
-  margin-top: 8px;
-}
-</style>
