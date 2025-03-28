@@ -16,46 +16,42 @@
       <h1 class="text-3xl font-bold mx-auto">photo</h1>
     </div>
 
-    <!-- 新增：選擇本地圖片 -->
-    <div v-if="selected">
-      <input type="file" accept="image/*" multiple @change="handleFileUpload" class="mb-4 mt-6" />
-    </div>
+    <div v-if="loading" class="mt-10 text-lg text-gray-600">載入中...</div>
 
-    <div class="grid grid-cols-3 gap-2 p-4 w-full">
+    <div class="grid grid-cols-3 gap-2 p-4 w-full" v-else>
       <div v-for="(photo, index) in photos" :key="index" class="relative">
-        <img :src="photo" class="w-full h-auto rounded-lg shadow-md" />
+        <img :src="photo" class="w-full h-auto rounded-lg shadow-md" @error="onImageError(photo)" />
       </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 
 const photos = ref<string[]>([])
+const loading = ref(true)
 const router = useRouter()
-const selected = ref(true)
 
 const goBack = () => {
   router.push('/')
 }
 
-const handleFileUpload = (event: Event) => {
-  const files = (event.target as HTMLInputElement).files
-  if (!files) return
-
-  photos.value = []
-  for (const file of Array.from(files)) {
-    const reader = new FileReader()
-    reader.onload = (e) => {
-      if (e.target?.result) {
-        photos.value.push(e.target.result as string)
-      }
-    }
-    reader.readAsDataURL(file)
-  }
-  selected.value = false
-  console.log(selected.value)
+const onImageError = (url: string) => {
+  console.warn('⚠️ 無法載入圖片：', url)
 }
+
+onMounted(async () => {
+  try {
+    const res = await fetch('https://upload-worker.5316eictlws-2.workers.dev/api/list')
+    const data = await res.json()
+    photos.value = data.files
+    console.log('✅ 圖片清單：', data.files)
+  } catch (error) {
+    console.error('❌ 讀取圖片清單失敗', error)
+  } finally {
+    loading.value = false
+  }
+})
 </script>

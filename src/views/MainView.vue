@@ -135,23 +135,23 @@ onMounted(() => {
       })
   }
   adjustWidth()
-  enterFullscreen()
+  // enterFullscreen()
 })
 
-const enterFullscreen = () => {
-  const elem = document.documentElement as HTMLElement & {
-    webkitRequestFullscreen?: () => Promise<void>
-    msRequestFullscreen?: () => Promise<void>
-  }
+// const enterFullscreen = () => {
+//   const elem = document.documentElement as HTMLElement & {
+//     webkitRequestFullscreen?: () => Promise<void>
+//     msRequestFullscreen?: () => Promise<void>
+//   }
 
-  if (elem.requestFullscreen) {
-    elem.requestFullscreen()
-  } else if (elem.webkitRequestFullscreen) {
-    elem.webkitRequestFullscreen()
-  } else if (elem.msRequestFullscreen) {
-    elem.msRequestFullscreen()
-  }
-}
+//   if (elem.requestFullscreen) {
+//     elem.requestFullscreen()
+//   } else if (elem.webkitRequestFullscreen) {
+//     elem.webkitRequestFullscreen()
+//   } else if (elem.msRequestFullscreen) {
+//     elem.msRequestFullscreen()
+//   }
+// }
 
 const adjustWidth = () => {
   nextTick(() => {
@@ -188,6 +188,25 @@ const capturePhoto = (): void => {
   previewUrl.value = imageUrl
   photos.value.push(imageUrl)
   localStorage.setItem('capturedPhotos', JSON.stringify(photos.value))
+
+  // ✅ 上傳到 Worker API
+  fetch('https://upload-worker.5316eictlws-2.workers.dev/api/upload', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({
+      image: imageUrl,
+    }),
+  })
+    .then((res) => res.json())
+    .then((data) => {
+      console.log('✅ 上傳成功', data)
+    })
+    .catch((err) => {
+      console.error('❌ 上傳失敗', err)
+    })
+
   downloadImage(imageUrl)
 }
 
