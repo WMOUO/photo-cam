@@ -165,7 +165,7 @@ const adjustWidth = () => {
   })
 }
 
-const capturePhoto = (): void => {
+const capturePhoto = async (): Promise<void> => {
   if (!video.value || !canvas.value) return
   const context = canvas.value.getContext('2d')
   if (!context) return
@@ -184,13 +184,13 @@ const capturePhoto = (): void => {
   context.textBaseline = 'middle'
   context.fillText(`To[${content.value}]`, canvas.value.width / 2, canvas.value.height / 2)
 
-  const imageUrl: string = canvas.value.toDataURL('image/png')
+  const imageUrl: string = canvas.value.toDataURL('image/png', 0.8)
   previewUrl.value = imageUrl
   photos.value.push(imageUrl)
   localStorage.setItem('capturedPhotos', JSON.stringify(photos.value))
 
   // ✅ 上傳到 Worker API
-  fetch('https://upload-worker.5316eictlws-2.workers.dev/api/upload', {
+  await fetch('https://upload-worker.5316eictlws-2.workers.dev/api/upload', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
