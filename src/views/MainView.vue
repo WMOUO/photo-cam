@@ -116,6 +116,7 @@ const previewUrl = ref<string>('')
 const router = useRouter()
 
 onMounted(() => {
+  enterFullscreen()
   if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
     navigator.mediaDevices
       .getUserMedia({
@@ -135,23 +136,22 @@ onMounted(() => {
       })
   }
   adjustWidth()
-  // enterFullscreen()
 })
 
-// const enterFullscreen = () => {
-//   const elem = document.documentElement as HTMLElement & {
-//     webkitRequestFullscreen?: () => Promise<void>
-//     msRequestFullscreen?: () => Promise<void>
-//   }
+const enterFullscreen = () => {
+  const elem = document.documentElement as HTMLElement & {
+    webkitRequestFullscreen?: () => Promise<void>
+    msRequestFullscreen?: () => Promise<void>
+  }
 
-//   if (elem.requestFullscreen) {
-//     elem.requestFullscreen()
-//   } else if (elem.webkitRequestFullscreen) {
-//     elem.webkitRequestFullscreen()
-//   } else if (elem.msRequestFullscreen) {
-//     elem.msRequestFullscreen()
-//   }
-// }
+  if (elem.requestFullscreen) {
+    elem.requestFullscreen()
+  } else if (elem.webkitRequestFullscreen) {
+    elem.webkitRequestFullscreen()
+  } else if (elem.msRequestFullscreen) {
+    elem.msRequestFullscreen()
+  }
+}
 
 const adjustWidth = () => {
   nextTick(() => {
