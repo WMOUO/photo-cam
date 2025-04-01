@@ -116,7 +116,7 @@ const previewUrl = ref<string>('')
 const router = useRouter()
 
 onMounted(() => {
-  enterFullscreen()
+  document.addEventListener('click', triggerFullscreenOnce, { once: true })
   if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
     navigator.mediaDevices
       .getUserMedia({
@@ -137,6 +137,10 @@ onMounted(() => {
   }
   adjustWidth()
 })
+
+const triggerFullscreenOnce = () => {
+  enterFullscreen()
+}
 
 const enterFullscreen = () => {
   const elem = document.documentElement as HTMLElement & {
