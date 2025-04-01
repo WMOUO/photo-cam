@@ -23,32 +23,23 @@
         <n-button type="primary" @click="closePreview" quaternary>
           <template #icon>
             <n-icon size="56" color="#FF2D2D">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                xmlns:xlink="http://www.w3.org/1999/xlink"
-                viewBox="0 0 512 512"
-              >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
                 <path
                   d="M256 48C141.31 48 48 141.31 48 256s93.31 208 208 208s208-93.31 208-208S370.69 48 256 48zm75.31 260.69a16 16 0 1 1-22.62 22.62L256 278.63l-52.69 52.68a16 16 0 0 1-22.62-22.62L233.37 256l-52.68-52.69a16 16 0 0 1 22.62-22.62L256 233.37l52.69-52.68a16 16 0 0 1 22.62 22.62L278.63 256z"
                   fill="currentColor"
-                ></path>
+                />
               </svg>
             </n-icon>
           </template>
         </n-button>
-
         <n-button type="primary" quaternary @click="confirmPrint">
           <template #icon>
             <n-icon size="45" color="#02C874">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                xmlns:xlink="http://www.w3.org/1999/xlink"
-                viewBox="0 0 512 512"
-              >
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
                 <path
                   d="M504 256c0 136.967-111.033 248-248 248S8 392.967 8 256S119.033 8 256 8s248 111.033 248 248zM227.314 387.314l184-184c6.248-6.248 6.248-16.379 0-22.627l-22.627-22.627c-6.248-6.249-16.379-6.249-22.628 0L216 308.118l-70.059-70.059c-6.248-6.248-16.379-6.248-22.628 0l-22.627 22.627c-6.248 6.248-6.248 16.379 0 22.627l104 104c6.249 6.249 16.379 6.249 22.628.001z"
                   fill="currentColor"
-                ></path>
+                />
               </svg>
             </n-icon>
           </template>
@@ -78,7 +69,7 @@
               <path
                 d="M2 3.75A.75.75 0 0 1 2.75 3h10.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 3.75zm0 4A.75.75 0 0 1 2.75 7h10.5a.75.75 0 0 1 0 1.5H2.75A.75.75 0 0 1 2 7.75zm0 4a.75.75 0 0 1 .75-.75h10.5a.75.75 0 0 1 0 1.5H2.75a.75.75 0 0 1-.75-.75z"
                 fill="currentColor"
-              ></path>
+              />
             </svg>
           </n-icon>
         </template>
@@ -90,11 +81,11 @@
         <template #icon>
           <n-icon size="60" color="#FFFFFF">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-              <circle cx="16" cy="16" r="10" fill="currentColor"></circle>
+              <circle cx="16" cy="16" r="10" fill="currentColor" />
               <path
                 d="M16 30a14 14 0 1 1 14-14a14.016 14.016 0 0 1-14 14zm0-26a12 12 0 1 0 12 12A12.014 12.014 0 0 0 16 4z"
                 fill="currentColor"
-              ></path>
+              />
             </svg>
           </n-icon>
         </template>
@@ -106,118 +97,98 @@
 <script setup lang="ts">
 import { ref, onMounted, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
+import { useNotification } from 'naive-ui'
+import type { NotificationReactive } from 'naive-ui/es/notification/src/NotificationProvider'
 
+const notification = useNotification()
 const video = ref<HTMLVideoElement | null>(null)
 const canvas = ref<HTMLCanvasElement | null>(null)
-const content = ref<string>('')
+const content = ref('')
 const inputEl = ref<HTMLInputElement | null>(null)
 const photos = ref<string[]>([])
-const previewUrl = ref<string>('')
+const previewUrl = ref('')
 const router = useRouter()
 
 onMounted(() => {
-  document.addEventListener('click', triggerFullscreenOnce, { once: true })
-  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    navigator.mediaDevices
-      .getUserMedia({
-        video: {
-          facingMode: 'user',
-          width: { ideal: 1920 },
-          height: { ideal: 1080 },
-        },
-      })
-      .then((stream) => {
-        if (video.value) {
-          video.value.srcObject = stream
-        }
-      })
-      .catch((error) => {
-        console.error('無法獲取攝影機視訊: ', error)
-      })
-  }
+  document.addEventListener('click', () => document.documentElement.requestFullscreen?.(), {
+    once: true,
+  })
+  navigator.mediaDevices
+    .getUserMedia({
+      video: {
+        facingMode: 'user',
+        width: { ideal: 1920 },
+        height: { ideal: 1080 },
+      },
+    })
+    .then((stream) => {
+      if (video.value) video.value.srcObject = stream
+    })
+    .catch((err) => console.error('無法獲取攝影機視訊:', err))
   adjustWidth()
 })
 
-const triggerFullscreenOnce = () => {
-  enterFullscreen()
-}
-
-const enterFullscreen = () => {
-  const elem = document.documentElement as HTMLElement & {
-    webkitRequestFullscreen?: () => Promise<void>
-    msRequestFullscreen?: () => Promise<void>
-  }
-
-  if (elem.requestFullscreen) {
-    elem.requestFullscreen()
-  } else if (elem.webkitRequestFullscreen) {
-    elem.webkitRequestFullscreen()
-  } else if (elem.msRequestFullscreen) {
-    elem.msRequestFullscreen()
-  }
-}
-
 const adjustWidth = () => {
   nextTick(() => {
-    if (inputEl.value) {
-      const textLength = content.value.length
-      const chineseCount = (content.value.match(/[一-龥]/g) || []).length
-      const englishCount = textLength - chineseCount
-      const newWidth = englishCount * 1.2 + chineseCount * 2
-      inputEl.value.style.width = `${Math.max(2, newWidth)}ch`
-    }
+    if (!inputEl.value) return
+    const chinese = (content.value.match(/[一-龥]/g) || []).length
+    const total = content.value.length
+    const width = Math.max(2, (total - chinese) * 1.2 + chinese * 2)
+    inputEl.value.style.width = `${width}ch`
   })
 }
 
-const capturePhoto = async (): Promise<void> => {
+const capturePhoto = async () => {
   if (!video.value || !canvas.value) return
-  const context = canvas.value.getContext('2d')
-  if (!context) return
+  const ctx = canvas.value.getContext('2d')
+  if (!ctx) return
+
   canvas.value.width = video.value.videoWidth
   canvas.value.height = video.value.videoHeight
+  ctx.save()
+  ctx.translate(canvas.value.width, 0)
+  ctx.scale(-1, 1)
+  ctx.drawImage(video.value, 0, 0, canvas.value.width, canvas.value.height)
+  ctx.restore()
 
-  context.save()
-  context.translate(canvas.value.width, 0)
-  context.scale(-1, 1)
-  context.drawImage(video.value, 0, 0, canvas.value.width, canvas.value.height)
-  context.restore()
+  ctx.font = '48px "Lexend", sans-serif'
+  ctx.fillStyle = 'white'
+  ctx.textAlign = 'center'
+  ctx.textBaseline = 'middle'
+  ctx.fillText(`To[${content.value}]`, canvas.value.width / 2, canvas.value.height / 2)
 
-  context.font = '48px "Lexend", sans-serif'
-  context.fillStyle = 'white'
-  context.textAlign = 'center'
-  context.textBaseline = 'middle'
-  context.fillText(`To[${content.value}]`, canvas.value.width / 2, canvas.value.height / 2)
-
-  const imageUrl: string = canvas.value.toDataURL('image/png', 0.8)
+  const imageUrl = canvas.value.toDataURL('image/png', 0.8)
   previewUrl.value = imageUrl
   photos.value.push(imageUrl)
   localStorage.setItem('capturedPhotos', JSON.stringify(photos.value))
 
-  // ✅ 上傳到 Worker API
-  await fetch('https://upload-worker.5316eictlws-2.workers.dev/api/upload', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify({
-      image: imageUrl,
-    }),
+  const uploadNotify: NotificationReactive = notification.create({
+    title: '圖片上傳中',
+    content: '請稍候…',
+    type: 'info',
+    duration: 0,
   })
-    .then((res) => res.json())
-    .then((data) => {
-      console.log('✅ 上傳成功', data)
-    })
-    .catch((err) => {
-      console.error('❌ 上傳失敗', err)
-    })
 
-  downloadImage(imageUrl)
-}
+  try {
+    const res = await fetch('https://upload-worker.5316eictlws-2.workers.dev/api/upload', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image: imageUrl }),
+    })
+    const data = await res.json()
+    console.log('✅ 上傳成功', data)
+    uploadNotify.destroy()
+    notification.success({ title: '上傳成功', content: '圖片已成功上傳' })
+  } catch (err: unknown) {
+    console.error('❌ 上傳失敗', err)
+    uploadNotify.destroy()
+    const errorMessage = err instanceof Error ? err.message : '請稍後再試'
+    notification.error({ title: '上傳失敗', content: errorMessage })
+  }
 
-const downloadImage = (dataUrl: string): void => {
   const link = document.createElement('a')
-  link.href = dataUrl
-  link.download = `captured_image_${new Date().getTime()}.png`
+  link.href = imageUrl
+  link.download = `captured_${Date.now()}.png`
   document.body.appendChild(link)
   link.click()
   document.body.removeChild(link)
@@ -229,37 +200,11 @@ const closePreview = () => {
 
 const confirmPrint = () => {
   const win = window.open('', '_blank')
-  if (win) {
-    win.document.write(`
-      <html>
-        <head>
-          <style>
-            @page {
-              margin: 0;
-            }
-            body {
-              margin: 0;
-              padding: 0;
-              display: flex;
-              justify-content: center;
-              align-items: center;
-              height: 100vh;
-              background-color: black;
-            }
-            img {
-              max-width: 100vw;
-              max-height: 100vh;
-              object-fit: contain;
-            }
-          </style>
-        </head>
-        <body>
-          <img src="${previewUrl.value}" onload="window.print(); window.close();">
-        </body>
-      </html>
-    `)
-    win.document.close()
-  }
+  if (!win) return
+  win.document.write(
+    `<!DOCTYPE html><html><head><style>@page{margin:0}body{margin:0;padding:0;display:flex;justify-content:center;align-items:center;height:100vh;background:black}img{max-width:100vw;max-height:100vh;object-fit:contain}</style></head><body><img src="${previewUrl.value}" onload="window.print();window.close();"></body></html>`,
+  )
+  win.document.close()
   closePreview()
 }
 
