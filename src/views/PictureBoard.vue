@@ -18,7 +18,7 @@
 
     <div v-if="loading" class="mt-10 text-lg text-gray-600">載入中...</div>
 
-    <div class="grid grid-cols-3 gap-2 p-4 w-full" v-else>
+    <div class="grid grid-cols-5 gap-2 p-4 w-full" v-else>
       <div v-for="(photo, index) in photos" :key="index" class="relative">
         <img :src="photo" class="w-full h-auto rounded-lg shadow-md" @error="onImageError(photo)" />
       </div>

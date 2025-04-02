@@ -64,12 +64,6 @@
 
     <div class="absolute inset-0 flex items-center justify-center">
       <div class="inline-flex items-center text-white text-6xl font-bold">
-        <div class="text-base text-green-300 mr-4 text-left leading-snug">
-          <p>isCameraReady: {{ isCameraReady }}</p>
-          <p>isUploading: {{ isUploading }}</p>
-          <p>videoWidth: {{ video?.videoWidth }}</p>
-          <p>videoHeight: {{ video?.videoHeight }}</p>
-        </div>
         <span>To[</span>
         <input
           type="text"
@@ -256,7 +250,7 @@ const capturePhoto = async () => {
     ctx.drawImage(video.value, 0, 0, width, height)
     ctx.restore()
 
-    ctx.font = '48px "Lexend", sans-serif'
+    ctx.font = '66px "Lexend", sans-serif'
     ctx.fillStyle = 'white'
     ctx.textAlign = 'center'
     ctx.textBaseline = 'middle'
