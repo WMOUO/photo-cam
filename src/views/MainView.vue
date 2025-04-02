@@ -144,7 +144,6 @@ const video = ref<HTMLVideoElement | null>(null)
 const canvas = ref<HTMLCanvasElement | null>(null)
 const content = ref('')
 const inputEl = ref<HTMLInputElement | null>(null)
-const photos = ref<string[]>([])
 const previewUrl = ref('')
 const router = useRouter()
 const isUploading = ref(false)
@@ -265,8 +264,6 @@ const capturePhoto = async () => {
 
     imageUrl = canvas.value.toDataURL('image/png', 0.8)
     previewUrl.value = imageUrl
-    photos.value.push(imageUrl)
-    localStorage.setItem('capturedPhotos', JSON.stringify(photos.value))
   } catch (err) {
     console.error('❌ 製作圖片時發生錯誤', err)
     notification.error({ title: '拍照錯誤', content: `${err}` })
