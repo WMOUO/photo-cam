@@ -1,5 +1,20 @@
 <template>
   <div class="relative w-screen h-screen flex flex-col items-center justify-center">
+    <div v-if="!isFullScreen" class="absolute top-4 left-4 z-10">
+      <n-button @click="requestFullScreen" quaternary class="px-4 py-2 rounded-lg">
+        <template #icon>
+          <n-icon size="40" color="#FFFFFF">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+              <path
+                d="M320 96h96v96h-48v-48h-48V96zM96 320h48v48h48v48H96v-96zm48-176H96v96h48v-48h48v-48H144zm272 176h-48v48h-48v48h96v-96z"
+                fill="currentColor"
+              />
+            </svg>
+          </n-icon>
+        </template>
+      </n-button>
+    </div>
+
     <div class="absolute inset-0 flex items-center justify-center overflow-hidden">
       <!-- 攝影機顯示區：拉滿整個寬高 -->
       <video
@@ -100,6 +115,18 @@ import { useRouter } from 'vue-router'
 import { useNotification } from 'naive-ui'
 import type { NotificationReactive } from 'naive-ui/es/notification/src/NotificationProvider'
 
+interface FullscreenDocument extends Document {
+  webkitFullscreenElement?: Element
+  mozFullScreenElement?: Element
+  msFullscreenElement?: Element
+}
+
+interface FullscreenElement extends HTMLElement {
+  webkitRequestFullscreen?: () => Promise<void>
+  mozRequestFullScreen?: () => Promise<void>
+  msRequestFullscreen?: () => Promise<void>
+}
+
 const notification = useNotification()
 const video = ref<HTMLVideoElement | null>(null)
 const canvas = ref<HTMLCanvasElement | null>(null)
@@ -108,11 +135,18 @@ const inputEl = ref<HTMLInputElement | null>(null)
 const photos = ref<string[]>([])
 const previewUrl = ref('')
 const router = useRouter()
+const isFullScreen = ref(false)
 
 onMounted(() => {
-  document.addEventListener('click', () => document.documentElement.requestFullscreen?.(), {
-    once: true,
-  })
+  document.addEventListener('fullscreenchange', checkFullScreen)
+  document.addEventListener('webkitfullscreenchange', checkFullScreen)
+  document.addEventListener('mozfullscreenchange', checkFullScreen)
+  document.addEventListener('MSFullscreenChange', checkFullScreen)
+
+  // 初始化時檢查狀態
+  checkFullScreen()
+
+  // 原本的攝影機設定
   navigator.mediaDevices
     .getUserMedia({
       video: {
@@ -127,6 +161,30 @@ onMounted(() => {
     .catch((err) => console.error('無法獲取攝影機視訊:', err))
   adjustWidth()
 })
+
+const checkFullScreen = () => {
+  const doc = document as FullscreenDocument
+  isFullScreen.value = !!(
+    document.fullscreenElement ||
+    doc.webkitFullscreenElement ||
+    doc.mozFullScreenElement ||
+    doc.msFullscreenElement
+  )
+}
+
+const requestFullScreen = () => {
+  const el = document.documentElement as FullscreenElement
+
+  if (el.requestFullscreen) {
+    el.requestFullscreen()
+  } else if (el.webkitRequestFullscreen) {
+    el.webkitRequestFullscreen()
+  } else if (el.mozRequestFullScreen) {
+    el.mozRequestFullScreen()
+  } else if (el.msRequestFullscreen) {
+    el.msRequestFullscreen()
+  }
+}
 
 const adjustWidth = () => {
   nextTick(() => {
