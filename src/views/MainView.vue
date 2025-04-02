@@ -92,7 +92,13 @@
     </div>
 
     <div class="absolute bottom-4 mid z-10 flex gap-2">
-      <n-button quaternary round @click="capturePhoto" class="px-4 py-2 rounded-lg shadow">
+      <n-button
+        quaternary
+        round
+        @click="capturePhoto"
+        :disabled="isUploading"
+        class="px-4 py-2 rounded-lg shadow"
+      >
         <template #icon>
           <n-icon size="60" color="#FFFFFF">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
@@ -135,6 +141,7 @@ const inputEl = ref<HTMLInputElement | null>(null)
 const photos = ref<string[]>([])
 const previewUrl = ref('')
 const router = useRouter()
+const isUploading = ref(false)
 const isFullScreen = ref(false)
 
 onMounted(() => {
@@ -197,6 +204,9 @@ const adjustWidth = () => {
 }
 
 const capturePhoto = async () => {
+  if (isUploading.value) return
+  isUploading.value = true
+
   if (!video.value || !canvas.value) return
   const ctx = canvas.value.getContext('2d')
   if (!ctx) return
@@ -242,6 +252,8 @@ const capturePhoto = async () => {
     uploadNotify.destroy()
     const errorMessage = err instanceof Error ? err.message : '請稍後再試'
     notification.error({ title: '上傳失敗', content: errorMessage })
+  } finally {
+    isUploading.value = false
   }
 
   const link = document.createElement('a')
