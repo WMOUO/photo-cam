@@ -225,7 +225,7 @@ const capturePhoto = async () => {
   ctx.textBaseline = 'middle'
   ctx.fillText(`To[${content.value}]`, canvas.value.width / 2, canvas.value.height / 2)
 
-  const imageUrl = canvas.value.toDataURL('image/png', 0.8)
+  const imageUrl = canvas.value.toDataURL('image/png', 0.2)
   previewUrl.value = imageUrl
   photos.value.push(imageUrl)
   localStorage.setItem('capturedPhotos', JSON.stringify(photos.value))
