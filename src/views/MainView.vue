@@ -269,7 +269,7 @@ const capturePhoto = async () => {
     localStorage.setItem('capturedPhotos', JSON.stringify(photos.value))
   } catch (err) {
     console.error('❌ 製作圖片時發生錯誤', err)
-    notification.error({ title: '拍照錯誤', content: '製作圖片失敗，請稍後再試' })
+    notification.error({ title: '拍照錯誤', content: `${err}` })
     isUploading.value = false
     return
   }
