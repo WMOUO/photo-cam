@@ -67,6 +67,8 @@
         <div class="text-base text-green-300 mr-4 text-left leading-snug">
           <p>isCameraReady: {{ isCameraReady }}</p>
           <p>isUploading: {{ isUploading }}</p>
+          <p>videoWidth: {{ video?.videoWidth }}</p>
+          <p>videoHeight: {{ video?.videoHeight }}</p>
         </div>
         <span>To[</span>
         <input
