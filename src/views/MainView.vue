@@ -145,6 +145,7 @@ const photos = ref<string[]>([])
 const previewUrl = ref('')
 const router = useRouter()
 const isUploading = ref(false)
+const isCameraReady = ref(false)
 const isFullScreen = ref(false)
 
 onMounted(() => {
@@ -152,11 +153,8 @@ onMounted(() => {
   document.addEventListener('webkitfullscreenchange', checkFullScreen)
   document.addEventListener('mozfullscreenchange', checkFullScreen)
   document.addEventListener('MSFullscreenChange', checkFullScreen)
-
-  // 初始化時檢查狀態
   checkFullScreen()
 
-  // 原本的攝影機設定
   navigator.mediaDevices
     .getUserMedia({
       video: {
@@ -166,9 +164,21 @@ onMounted(() => {
       },
     })
     .then((stream) => {
-      if (video.value) video.value.srcObject = stream
+      if (video.value) {
+        video.value.srcObject = stream
+
+        // ✅ 等 metadata 載入後才開放拍照
+        video.value.addEventListener('loadedmetadata', () => {
+          console.log('[DEBUG] 視訊 metadata 載入完成')
+          isCameraReady.value = true
+        })
+      }
     })
-    .catch((err) => console.error('無法獲取攝影機視訊:', err))
+    .catch((err) => {
+      console.error('❌ 無法獲取攝影機視訊:', err)
+      notification.error({ title: '錯誤', content: '無法啟動攝影機' })
+    })
+
   adjustWidth()
 })
 
@@ -208,6 +218,12 @@ const adjustWidth = () => {
 
 const capturePhoto = async () => {
   console.log('[DEBUG] 開始拍照流程')
+
+  if (!isCameraReady.value) {
+    notification.warning({ title: '請稍候', content: '攝影機尚未準備好' })
+    console.warn('[DEBUG] 攝影機未就緒，禁止拍照')
+    return
+  }
 
   if (isUploading.value) {
     console.warn('[DEBUG] 正在上傳中，略過此次拍照')
