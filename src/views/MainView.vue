@@ -64,6 +64,9 @@
 
     <div class="absolute inset-0 flex items-center justify-center">
       <div class="inline-flex items-center text-white text-6xl font-bold">
+        <div>
+          <p>{{ isUploading }}</p>
+        </div>
         <span>To[</span>
         <input
           type="text"
@@ -204,31 +207,53 @@ const adjustWidth = () => {
 }
 
 const capturePhoto = async () => {
-  if (isUploading.value) return
+  console.log('[DEBUG] 開始拍照流程')
+
+  if (isUploading.value) {
+    console.warn('[DEBUG] 正在上傳中，略過此次拍照')
+    return
+  }
   isUploading.value = true
 
-  if (!video.value || !canvas.value) return
-  const ctx = canvas.value.getContext('2d')
-  if (!ctx) return
+  if (!video.value || !canvas.value) {
+    console.error('[DEBUG] video 或 canvas 尚未準備好')
+    isUploading.value = false
+    return
+  }
 
-  canvas.value.width = video.value.videoWidth
-  canvas.value.height = video.value.videoHeight
-  ctx.save()
-  ctx.translate(canvas.value.width, 0)
-  ctx.scale(-1, 1)
-  ctx.drawImage(video.value, 0, 0, canvas.value.width, canvas.value.height)
-  ctx.restore()
+  let imageUrl = ''
+  try {
+    const ctx = canvas.value.getContext('2d')
+    if (!ctx) throw new Error('無法取得 canvas context')
 
-  ctx.font = '48px "Lexend", sans-serif'
-  ctx.fillStyle = 'white'
-  ctx.textAlign = 'center'
-  ctx.textBaseline = 'middle'
-  ctx.fillText(`To[${content.value}]`, canvas.value.width / 2, canvas.value.height / 2)
+    const width = video.value.videoWidth
+    const height = video.value.videoHeight
+    if (width === 0 || height === 0) throw new Error('攝影機尚未準備好')
 
-  const imageUrl = canvas.value.toDataURL('image/png', 0.8)
-  previewUrl.value = imageUrl
-  photos.value.push(imageUrl)
-  localStorage.setItem('capturedPhotos', JSON.stringify(photos.value))
+    canvas.value.width = width
+    canvas.value.height = height
+    ctx.save()
+    ctx.translate(width, 0)
+    ctx.scale(-1, 1)
+    ctx.drawImage(video.value, 0, 0, width, height)
+    ctx.restore()
+
+    ctx.font = '48px "Lexend", sans-serif'
+    ctx.fillStyle = 'white'
+    ctx.textAlign = 'center'
+    ctx.textBaseline = 'middle'
+    ctx.fillText(`To[${content.value}]`, width / 2, height / 2)
+
+    imageUrl = canvas.value.toDataURL('image/png', 0.8)
+    previewUrl.value = imageUrl
+    photos.value.push(imageUrl)
+    localStorage.setItem('capturedPhotos', JSON.stringify(photos.value))
+  } catch (err) {
+    console.error('❌ 製作圖片時發生錯誤', err)
+    notification.error({ title: '拍照錯誤', content: '製作圖片失敗，請稍後再試' })
+    isUploading.value = false
+    return
+  }
 
   const uploadNotify: NotificationReactive = notification.create({
     title: '圖片上傳中',
@@ -251,9 +276,18 @@ const capturePhoto = async () => {
     ])) as Response
 
     const data = await res.json()
-    console.log(data)
+    console.log('✅ 上傳成功', data)
+
     uploadNotify.destroy()
     notification.success({ title: '上傳成功', content: '圖片已成功上傳' })
+
+    // ✅ 成功才下載
+    const link = document.createElement('a')
+    link.href = imageUrl
+    link.download = `captured_${Date.now()}.png`
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
   } catch (err: unknown) {
     console.error('❌ 上傳失敗', err)
     uploadNotify.destroy()
@@ -261,14 +295,8 @@ const capturePhoto = async () => {
     notification.error({ title: '上傳失敗', content: errorMessage })
   } finally {
     isUploading.value = false
+    console.log('[DEBUG] 上傳流程結束，isUploading = false')
   }
-
-  const link = document.createElement('a')
-  link.href = imageUrl
-  link.download = `captured_${Date.now()}.png`
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
 }
 
 const closePreview = () => {
