@@ -62,21 +62,20 @@
       </div>
     </div>
 
-    <div class="absolute inset-0 flex items-center justify-center">
-      <div class="inline-flex items-center text-white text-6xl font-bold">
-        <div>
-          <p>{{ isUploading }}</p>
-        </div>
-        <span>To[</span>
-        <input
-          type="text"
-          v-model="content"
-          class="bg-transparent border-none focus:outline-none text-white font-bold text-6xl text-center p-0 m-0 w-auto min-w-[2ch] tracking-normal"
-          @input="adjustWidth"
-          ref="inputEl"
-        />
-        <span>]</span>
+    <div class="inline-flex items-center text-white text-6xl font-bold">
+      <div class="text-base text-green-300 mr-4 text-left leading-snug">
+        <p>isCameraReady: {{ isCameraReady }}</p>
+        <p>isUploading: {{ isUploading }}</p>
       </div>
+      <span>To[</span>
+      <input
+        type="text"
+        v-model="content"
+        class="bg-transparent border-none focus:outline-none text-white font-bold text-6xl text-center p-0 m-0 w-auto min-w-[2ch] tracking-normal"
+        @input="adjustWidth"
+        ref="inputEl"
+      />
+      <span>]</span>
     </div>
 
     <div class="absolute top-4 right-4 z-10 flex gap-2">
