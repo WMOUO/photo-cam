@@ -225,7 +225,7 @@ const capturePhoto = async () => {
   ctx.textBaseline = 'middle'
   ctx.fillText(`To[${content.value}]`, canvas.value.width / 2, canvas.value.height / 2)
 
-  const imageUrl = canvas.value.toDataURL('image/png', 0.2)
+  const imageUrl = canvas.value.toDataURL('image/png', 0.8)
   previewUrl.value = imageUrl
   photos.value.push(imageUrl)
   localStorage.setItem('capturedPhotos', JSON.stringify(photos.value))
@@ -237,14 +237,21 @@ const capturePhoto = async () => {
     duration: 0,
   })
 
+  const timeout = (ms = 8000) =>
+    new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), ms))
+
   try {
-    const res = await fetch('https://upload-worker.5316eictlws-2.workers.dev/api/upload', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ image: imageUrl }),
-    })
+    const res = (await Promise.race([
+      fetch('https://upload-worker.5316eictlws-2.workers.dev/api/upload', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: imageUrl }),
+      }),
+      timeout(),
+    ])) as Response
+
     const data = await res.json()
-    console.log('✅ 上傳成功', data)
+    console.log(data)
     uploadNotify.destroy()
     notification.success({ title: '上傳成功', content: '圖片已成功上傳' })
   } catch (err: unknown) {
