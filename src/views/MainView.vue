@@ -237,7 +237,7 @@ const capturePhoto = async () => {
     duration: 0,
   })
 
-  const timeout = (ms = 8000) =>
+  const timeout = (ms = 10000) =>
     new Promise((_, reject) => setTimeout(() => reject(new Error('Timeout')), ms))
 
   try {
