@@ -144,6 +144,10 @@ const isUploading = ref(false)
 const isCameraReady = ref(false)
 const isFullScreen = ref(false)
 
+// ios用戶須設定
+video.value?.setAttribute('autoplay', '')
+video.value?.setAttribute('muted', '')
+video.value?.setAttribute('playsinline', '')
 onMounted(() => {
   document.addEventListener('fullscreenchange', checkFullScreen)
   document.addEventListener('webkitfullscreenchange', checkFullScreen)
@@ -316,10 +320,56 @@ const closePreview = () => {
 const confirmPrint = () => {
   const win = window.open('', '_blank')
   if (!win) return
-  win.document.write(
-    `<!DOCTYPE html><html><head><style>@page{margin:0}body{margin:0;padding:0;display:flex;justify-content:center;align-items:center;height:100vh;background:black}img{max-width:100vw;max-height:100vh;object-fit:contain}</style></head><body><img src="${previewUrl.value}" onload="window.print();window.close();"></body></html>`,
-  )
+
+  const style = `
+    @media print {
+      @page {
+        size: A6 landscape;
+        margin: 0;
+      }
+      body {
+        margin: 0;
+        padding: 0;
+        background: black;
+        width: 100%;
+        height: 100%;
+      }
+      img {
+        width: 100vw;
+        height: 100vh;
+        object-fit: cover;
+      }
+    }
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      background: black;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    img {
+      width: 100vw;
+      height: 100vh;
+      object-fit: cover;
+    }
+  `
+
+  win.document.write(`
+    <!DOCTYPE html>
+    <html>
+      <head>
+        <style>${style}</style>
+      </head>
+      <body>
+        <img src="${previewUrl.value}" onload="window.print(); window.close();" />
+      </body>
+    </html>
+  `)
   win.document.close()
+
   closePreview()
 }
 
