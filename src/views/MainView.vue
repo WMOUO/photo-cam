@@ -353,7 +353,7 @@ const confirmPrint = () => {
     img {
       width: 100vw;
       height: 100vh;
-      object-fit: cover;
+      object-fit: contain;
     }
   `
 
