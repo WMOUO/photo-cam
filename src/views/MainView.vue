@@ -209,10 +209,10 @@ const requestFullScreen = () => {
 const adjustWidth = () => {
   nextTick(() => {
     if (!inputEl.value) return
-    const chinese = (content.value.match(/[一-龥]/g) || []).length
-    const total = content.value.length
-    const width = Math.max(2, (total - chinese) * 1.2 + chinese * 2)
-    inputEl.value.style.width = `${width}ch`
+    content.value = content.value.replace(/[^A-Z]/gi, '').toUpperCase()
+    inputEl.value!.style.width = '1ch' // 先設小一點避免 scrollWidth 不準
+    const width = inputEl.value!.scrollWidth
+    inputEl.value!.style.width = `${width + 10}px` // 加一些 padding，避免太剛好
   })
 }
 
